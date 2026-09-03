@@ -276,3 +276,34 @@ ON CONFLICT (slug) DO UPDATE SET
     stock = EXCLUDED.stock,
     is_featured = EXCLUDED.is_featured,
     badge = EXCLUDED.badge;
+
+-- =========================================================================
+-- SUPABASE STORAGE — Bucket para imágenes de productos
+-- =========================================================================
+
+-- Crear el bucket (public = las imágenes son accesibles por URL sin auth)
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+  'product-images',
+  'product-images',
+  true,
+  10485760,  -- 10 MB máximo por imagen
+  ARRAY['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']
+)
+ON CONFLICT (id) DO NOTHING;
+
+-- Política: cualquier usuario autenticado o anónimo puede SUBIR imágenes
+CREATE POLICY "Permitir subida de imagenes de productos"
+ON storage.objects FOR INSERT
+WITH CHECK (bucket_id = 'product-images');
+
+-- Política: cualquier persona puede VER/LEER las imágenes (URLs públicas)
+CREATE POLICY "Permitir lectura publica de imagenes"
+ON storage.objects FOR SELECT
+USING (bucket_id = 'product-images');
+
+-- Política: permitir eliminar imágenes (para cuando el admin borra un producto)
+CREATE POLICY "Permitir eliminar imagenes de productos"
+ON storage.objects FOR DELETE
+USING (bucket_id = 'product-images');
+
