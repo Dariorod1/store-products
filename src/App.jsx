@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { STORE_NAME } from './lib/config';
 import { ProductProvider } from './context/ProductContext';
 import { CartProvider } from './context/CartContext';
@@ -21,6 +21,10 @@ const MainAppContent = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [viewAdmin, setViewAdmin] = useState(false);
   const { isAdminLoggedIn } = useAuth();
+
+  useEffect(() => {
+    document.title = `${STORE_NAME} - Tienda Multirrubro`;
+  }, []);
 
   if (viewAdmin) {
     if (!isAdminLoggedIn) {
