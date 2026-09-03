@@ -70,12 +70,14 @@ export const ProductProvider = ({ children }) => {
   const addProduct = async (newProductData) => {
     // Siempre intentamos guardar en Supabase primero
     try {
+      // Extraemos category_name porque no existe como columna en la DB
+      // (se obtiene desde la tabla categories via category_slug)
+      const { category_name, ...rest } = newProductData;
       const payload = {
-        ...newProductData,
+        ...rest,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
-      // Eliminar el id si viene undefined para que Supabase lo genere
       delete payload.id;
 
       const { data, error } = await supabase
@@ -92,7 +94,6 @@ export const ProductProvider = ({ children }) => {
       }
     } catch (err) {
       console.error('Error guardando en Supabase:', err.message);
-      // Fallback solo si Supabase falla completamente
       const localProd = { ...newProductData, id: `prod-${Date.now()}` };
       setProducts((prev) => [localProd, ...prev]);
       return { success: true, warning: 'Guardado localmente — revisá la conexión a Supabase' };
@@ -100,12 +101,15 @@ export const ProductProvider = ({ children }) => {
   };
 
 
+
   const updateProduct = async (id, updatedFields) => {
     if (isUsingSupabase && !id.toString().startsWith('prod-')) {
       try {
+        // Excluir category_name porque no existe como columna en la DB
+        const { category_name, ...fieldsToUpdate } = updatedFields;
         const { data, error } = await supabase
           .from('products')
-          .update({ ...updatedFields, updated_at: new Date().toISOString() })
+          .update({ ...fieldsToUpdate, updated_at: new Date().toISOString() })
           .eq('id', id)
           .select();
 
@@ -120,6 +124,7 @@ export const ProductProvider = ({ children }) => {
     );
     return { success: true };
   };
+
 
   const deleteProduct = async (id) => {
     if (isUsingSupabase && !id.toString().startsWith('prod-')) {
