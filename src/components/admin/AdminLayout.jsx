@@ -7,7 +7,8 @@ import {
   ShoppingBag, 
   LogOut, 
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  TrendingUp
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useProducts } from '../../context/ProductContext';
@@ -15,6 +16,7 @@ import { ProductListTable } from './ProductListTable';
 import { ProductForm } from './ProductForm';
 import { CategoryManager } from './CategoryManager';
 import { OrdersList } from './OrdersList';
+import { SearchMetrics } from './SearchMetrics';
 
 export const AdminLayout = ({ onCloseAdmin }) => {
   const { logoutAdmin } = useAuth();
@@ -134,10 +136,10 @@ export const AdminLayout = ({ onCloseAdmin }) => {
         </div>
 
         {/* Section Navigation Tabs */}
-        <div className="flex items-center gap-2 border-b border-[#F0E2DC] pb-1">
+        <div className="flex items-center gap-2 border-b border-[#F0E2DC] pb-1 overflow-x-auto no-scrollbar">
           <button
             onClick={() => setActiveTab('products')}
-            className={`px-5 py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all ${
+            className={`px-5 py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all shrink-0 ${
               activeTab === 'products'
                 ? 'bg-gradient-to-r from-[#D88A92] to-[#C8747D] text-white shadow-xs'
                 : 'text-[#7A6266] hover:bg-white hover:text-[#3D2B2E]'
@@ -149,7 +151,7 @@ export const AdminLayout = ({ onCloseAdmin }) => {
 
           <button
             onClick={() => setActiveTab('categories')}
-            className={`px-5 py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all ${
+            className={`px-5 py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all shrink-0 ${
               activeTab === 'categories'
                 ? 'bg-gradient-to-r from-[#D88A92] to-[#C8747D] text-white shadow-xs'
                 : 'text-[#7A6266] hover:bg-white hover:text-[#3D2B2E]'
@@ -161,7 +163,7 @@ export const AdminLayout = ({ onCloseAdmin }) => {
 
           <button
             onClick={() => setActiveTab('orders')}
-            className={`px-5 py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all ${
+            className={`px-5 py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all shrink-0 ${
               activeTab === 'orders'
                 ? 'bg-gradient-to-r from-[#D88A92] to-[#C8747D] text-white shadow-xs'
                 : 'text-[#7A6266] hover:bg-white hover:text-[#3D2B2E]'
@@ -169,6 +171,18 @@ export const AdminLayout = ({ onCloseAdmin }) => {
           >
             <ShoppingBag className="w-4 h-4" />
             <span>Pedidos Recibidos</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('metrics')}
+            className={`px-5 py-2.5 rounded-2xl font-bold text-xs flex items-center gap-2 transition-all shrink-0 ${
+              activeTab === 'metrics'
+                ? 'bg-gradient-to-r from-[#D88A92] to-[#C8747D] text-white shadow-xs'
+                : 'text-[#7A6266] hover:bg-white hover:text-[#3D2B2E]'
+            }`}
+          >
+            <TrendingUp className="w-4 h-4" />
+            <span>Lo Más Buscado 🔥</span>
           </button>
         </div>
 
@@ -183,6 +197,8 @@ export const AdminLayout = ({ onCloseAdmin }) => {
         {activeTab === 'categories' && <CategoryManager />}
 
         {activeTab === 'orders' && <OrdersList />}
+
+        {activeTab === 'metrics' && <SearchMetrics />}
 
       </main>
 

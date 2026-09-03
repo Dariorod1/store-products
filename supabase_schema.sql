@@ -307,3 +307,17 @@ CREATE POLICY "Permitir eliminar imagenes de productos"
 ON storage.objects FOR DELETE
 USING (bucket_id = 'product-images');
 
+-- =========================================================================
+-- TABLA DE LOGS DE BÚSQUEDA (Métricas de la Tienda)
+-- =========================================================================
+CREATE TABLE IF NOT EXISTS public.search_logs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    query TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.search_logs ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Permitir insertar logs de busqueda a todos" ON public.search_logs FOR INSERT WITH CHECK (true);
+CREATE POLICY "Permitir lectura de logs de busqueda" ON public.search_logs FOR SELECT USING (true);
+
+

@@ -66,6 +66,34 @@ export const ProductProvider = ({ children }) => {
     fetchProductsAndCategories();
   }, []);
 
+  // Registrar búsquedas de los clientes con debounce (persiste en Supabase y localStorage)
+  useEffect(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query || query.length < 2) return;
+
+    const timer = setTimeout(async () => {
+      const nowIso = new Date().toISOString();
+
+      // 1. Guardar en localStorage (respaldo local)
+      try {
+        const localLogs = JSON.parse(localStorage.getItem('store_search_logs') || '[]');
+        localLogs.push({ query, created_at: nowIso });
+        localStorage.setItem('store_search_logs', JSON.stringify(localLogs.slice(-500)));
+      } catch (e) {
+        console.error('Error al guardar log de búsqueda local:', e);
+      }
+
+      // 2. Guardar en Supabase (persistencia global)
+      try {
+        await supabase.from('search_logs').insert([{ query, created_at: nowIso }]);
+      } catch (err) {
+        console.warn('Log de búsqueda solo guardado localmente:', err.message);
+      }
+    }, 1200);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   // CRUD Operations for Admin Panel
   const addProduct = async (newProductData) => {
     // Siempre intentamos guardar en Supabase primero
