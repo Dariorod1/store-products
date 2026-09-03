@@ -1,4 +1,5 @@
 import React from 'react';
+import { STORE_NAME } from '../lib/config';
 import { 
   Search, 
   Menu, 
@@ -43,7 +44,7 @@ export const Navbar = ({ onOpenSidebar, onOpenAdmin }) => {
             </div>
             <div className="flex flex-col">
               <span className="font-serif font-bold text-xl sm:text-2xl tracking-tight text-[#3D2B2E]">
-                EmprendeStore
+                {STORE_NAME}
               </span>
               <span className="text-[10px] uppercase font-bold tracking-widest text-[#C8747D] -mt-1 flex items-center gap-1">
                 <Sparkles className="w-2.5 h-2.5 text-[#E8A5AC] inline" /> Tienda Multirrubro

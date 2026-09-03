@@ -23,7 +23,7 @@ export const calculateDiscount = (price, originalPrice) => {
  * Generates a formatted WhatsApp direct order URL with cart summary and customer details
  */
 export const generateWhatsAppUrl = (cartItems, customerInfo = {}, whatsappNumber = '5493863434888') => {
-  const storeName = import.meta.env.VITE_STORE_NAME || 'EmprendeStore';
+  const storeName = import.meta.env.VITE_STORE_NAME || 'Mi Tienda';
   const cleanNumber = (import.meta.env.VITE_WHATSAPP_NUMBER || whatsappNumber).replace(/[^0-9]/g, '');
 
   let text = `🛒 *NUEVO PEDIDO - ${storeName}*\n`;

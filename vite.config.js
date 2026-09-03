@@ -24,5 +24,8 @@ export default defineConfig({
     'import.meta.env.VITE_WHATSAPP_NUMBER': JSON.stringify(
       process.env.WHATSAPP_NUMBER || process.env.VITE_WHATSAPP_NUMBER
     ),
+    'import.meta.env.VITE_STORE_NAME': JSON.stringify(
+      process.env.STORE_NAME || process.env.VITE_STORE_NAME || 'Mi Tienda'
+    ),
   }
 });

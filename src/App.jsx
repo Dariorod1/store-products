@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { STORE_NAME } from './lib/config';
 import { ProductProvider } from './context/ProductContext';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -80,7 +81,7 @@ const MainAppContent = () => {
                   <Store className="w-5 h-5" />
                 </div>
                 <span className="font-serif font-bold text-xl text-[#3D2B2E]">
-                  EmprendeStore
+                  {STORE_NAME}
                 </span>
               </div>
               <p className="text-xs text-[#7A6266] leading-relaxed max-w-sm">
@@ -127,7 +128,7 @@ const MainAppContent = () => {
           </div>
 
           <div className="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-[#9E8286] gap-4">
-            <p>© {new Date().getFullYear()} EmprendeStore - Todos los derechos reservados.</p>
+            <p>© {new Date().getFullYear()} {STORE_NAME} - Todos los derechos reservados.</p>
             <p className="flex items-center gap-1">
               Diseñado con <Heart className="w-3.5 h-3.5 text-[#C8747D] fill-[#C8747D]" /> para emprendedoras.
             </p>
