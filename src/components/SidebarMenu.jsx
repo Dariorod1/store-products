@@ -185,7 +185,7 @@ export const SidebarMenu = ({ isOpen, onClose, onOpenAdmin }) => {
 
           {/* Contact Support WhatsApp */}
           <a
-            href="https://wa.me/5491112345678?text=Hola,%20tengo%20una%20consulta%20sobre%20los%20productos"
+            href="https://wa.me/5493863434888?text=Hola,%20tengo%20una%20consulta%20sobre%20los%20productos"
             target="_blank"
             rel="noopener noreferrer"
             className="w-full py-2.5 px-4 rounded-xl bg-[#EBF5ED] hover:bg-[#DDF0E0] border border-[#C2E0C8] text-[#2D6A3B] text-xs font-semibold flex items-center justify-center gap-2 transition-all"

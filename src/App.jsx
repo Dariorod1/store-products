@@ -108,7 +108,7 @@ const MainAppContent = () => {
               </h4>
               <div className="space-y-2 text-xs">
                 <a
-                  href="https://wa.me/5491112345678?text=Hola,%20tengo%20una%20consulta"
+                  href="https://wa.me/5493863434888?text=Hola,%20tengo%20una%20consulta"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-[#2D6A3B] hover:underline font-semibold"

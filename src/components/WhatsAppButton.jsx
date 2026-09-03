@@ -2,7 +2,7 @@ import React from 'react';
 import { MessageCircle } from 'lucide-react';
 
 export const WhatsAppButton = () => {
-  const number = (import.meta.env.VITE_WHATSAPP_NUMBER || '5491112345678').replace(/[^0-9]/g, '');
+  const number = (import.meta.env.VITE_WHATSAPP_NUMBER || '5493863434888').replace(/[^0-9]/g, '');
 
   return (
     <a

@@ -45,7 +45,7 @@ export const HeroBanner = () => {
                 </button>
 
                 <a
-                  href="https://wa.me/5491112345678?text=Hola,%20quisiera%20consultar%20por%20sus%20productos"
+                  href="https://wa.me/5493863434888?text=Hola,%20quisiera%20consultar%20por%20sus%20productos"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-5 py-3 rounded-2xl bg-[#FFFDF9] hover:bg-[#FDF6F0] border border-[#E8D5CD] text-[#2D6A3B] font-semibold text-xs flex items-center gap-2 transition-all hover:scale-[1.02] shadow-xs"
