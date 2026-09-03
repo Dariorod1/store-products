@@ -1,5 +1,5 @@
 import React from 'react';
-import { STORE_NAME } from '../lib/config';
+import { STORE_NAME, STORE_SUBTITLE } from '../lib/config';
 import { 
   Search, 
   Menu, 
@@ -38,16 +38,17 @@ export const Navbar = ({ onOpenSidebar, onOpenAdmin }) => {
             </span>
           </button>
 
-          <a href="#" className="flex items-center gap-2.5 sm:gap-3 group py-1">
+          <a href="#" className="flex items-center gap-2 sm:gap-3 group min-w-0">
             <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-[#E8A5AC] via-[#D88A92] to-[#C8747D] flex items-center justify-center shadow-md shadow-[#D88A92]/20 group-hover:scale-105 transition-all duration-300 shrink-0">
-              <Store className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              <Store className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-white" />
             </div>
-            <div className="flex flex-col justify-center overflow-visible py-0.5">
-              <span className="font-serif font-bold text-lg sm:text-2xl leading-normal text-[#3D2B2E] pt-0.5">
+            <div className="flex flex-col justify-center min-w-0">
+              <span className="font-serif font-bold text-base sm:text-2xl text-[#3D2B2E] truncate max-w-[130px] min-[380px]:max-w-[180px] sm:max-w-none leading-snug">
                 {STORE_NAME}
               </span>
-              <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-widest text-[#C8747D] leading-none flex items-center gap-1">
-                <Sparkles className="w-2.5 h-2.5 text-[#E8A5AC] inline" /> Tienda Multirrubro
+              <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-widest text-[#C8747D] flex items-center gap-1 leading-none truncate">
+                <Sparkles className="w-2.5 h-2.5 text-[#E8A5AC] shrink-0 inline" />
+                <span className="truncate">{STORE_SUBTITLE}</span>
               </span>
             </div>
           </a>
