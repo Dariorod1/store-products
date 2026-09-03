@@ -22,33 +22,38 @@ export const ProductProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      // 1. Try fetching categories from Supabase
+      // 1. Fetch categories from Supabase
       const { data: dbCategories, error: catErr } = await supabase
         .from('categories')
         .select('*')
         .order('name');
 
-      // 2. Try fetching products from Supabase
+      // 2. Fetch products from Supabase
       const { data: dbProducts, error: prodErr } = await supabase
         .from('products')
         .select('*')
         .order('created_at', { ascending: false });
 
+      if (catErr) console.warn('Error categorias:', catErr.message);
+      if (prodErr) console.warn('Error productos:', prodErr.message);
+
+      // Si Supabase responde (aunque esté vacío) usamos la DB real
+      if (!prodErr) {
+        setProducts(dbProducts || []);
+        setIsUsingSupabase(true);
+      } else {
+        // Solo caemos al mock si hay un error real de conexión
+        console.log('Fallback a mock products por error de conexión');
+        setProducts(MOCK_PRODUCTS);
+        setIsUsingSupabase(false);
+      }
+
       if (!catErr && dbCategories && dbCategories.length > 0) {
         setCategories(dbCategories);
       }
 
-      if (!prodErr && dbProducts && dbProducts.length > 0) {
-        setProducts(dbProducts);
-        setIsUsingSupabase(true);
-      } else {
-        // Fallback to rich mock data if empty or error
-        console.log('Using mock products fallback');
-        setProducts(MOCK_PRODUCTS);
-        setIsUsingSupabase(false);
-      }
     } catch (err) {
-      console.warn('Error connecting to Supabase, using local fallback:', err);
+      console.warn('Error conectando a Supabase, usando fallback local:', err);
       setProducts(MOCK_PRODUCTS);
       setCategories(MOCK_CATEGORIES);
       setIsUsingSupabase(false);
@@ -63,36 +68,37 @@ export const ProductProvider = ({ children }) => {
 
   // CRUD Operations for Admin Panel
   const addProduct = async (newProductData) => {
-    const newProd = {
-      ...newProductData,
-      id: isUsingSupabase ? undefined : `prod-${Date.now()}`,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
+    // Siempre intentamos guardar en Supabase primero
+    try {
+      const payload = {
+        ...newProductData,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      // Eliminar el id si viene undefined para que Supabase lo genere
+      delete payload.id;
 
-    if (isUsingSupabase) {
-      try {
-        const { data, error } = await supabase
-          .from('products')
-          .insert([newProd])
-          .select();
+      const { data, error } = await supabase
+        .from('products')
+        .insert([payload])
+        .select();
 
-        if (error) throw error;
-        if (data && data.length > 0) {
-          setProducts((prev) => [data[0], ...prev]);
-          return { success: true, data: data[0] };
-        }
-      } catch (err) {
-        console.error('Error saving to Supabase:', err.message);
-        // Local update fallback
-        setProducts((prev) => [{ ...newProd, id: `prod-${Date.now()}` }, ...prev]);
-        return { success: true, warning: 'Guardado localmente (ejecuta el script SQL para guardar en Supabase)' };
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        setProducts((prev) => [data[0], ...prev]);
+        setIsUsingSupabase(true);
+        return { success: true, data: data[0] };
       }
-    } else {
-      setProducts((prev) => [{ ...newProd, id: `prod-${Date.now()}` }, ...prev]);
-      return { success: true };
+    } catch (err) {
+      console.error('Error guardando en Supabase:', err.message);
+      // Fallback solo si Supabase falla completamente
+      const localProd = { ...newProductData, id: `prod-${Date.now()}` };
+      setProducts((prev) => [localProd, ...prev]);
+      return { success: true, warning: 'Guardado localmente — revisá la conexión a Supabase' };
     }
   };
+
 
   const updateProduct = async (id, updatedFields) => {
     if (isUsingSupabase && !id.toString().startsWith('prod-')) {
