@@ -66,7 +66,7 @@ export const ProductProvider = ({ children }) => {
     fetchProductsAndCategories();
   }, []);
 
-  // Registrar búsquedas de los clientes con debounce (persiste en Supabase y localStorage)
+  // Registrar búsquedas de los clientes con debounce (Guarda en Supabase, o en localStorage si falla la red)
   useEffect(() => {
     const query = searchQuery.trim().toLowerCase();
     if (!query || query.length < 2) return;
@@ -74,20 +74,19 @@ export const ProductProvider = ({ children }) => {
     const timer = setTimeout(async () => {
       const nowIso = new Date().toISOString();
 
-      // 1. Guardar en localStorage (respaldo local)
       try {
-        const localLogs = JSON.parse(localStorage.getItem('store_search_logs') || '[]');
-        localLogs.push({ query, created_at: nowIso });
-        localStorage.setItem('store_search_logs', JSON.stringify(localLogs.slice(-500)));
-      } catch (e) {
-        console.error('Error al guardar log de búsqueda local:', e);
-      }
-
-      // 2. Guardar en Supabase (persistencia global)
-      try {
-        await supabase.from('search_logs').insert([{ query, created_at: nowIso }]);
+        // Intentar guardar en la DB de Supabase
+        const { error } = await supabase.from('search_logs').insert([{ query, created_at: nowIso }]);
+        if (error) throw error;
       } catch (err) {
-        console.warn('Log de búsqueda solo guardado localmente:', err.message);
+        // Fallback a localStorage solo si Supabase no responde
+        try {
+          const localLogs = JSON.parse(localStorage.getItem('store_search_logs') || '[]');
+          localLogs.push({ query, created_at: nowIso });
+          localStorage.setItem('store_search_logs', JSON.stringify(localLogs.slice(-500)));
+        } catch (e) {
+          console.error('Error guardando log local:', e);
+        }
       }
     }, 1200);
 

@@ -19,21 +19,13 @@ export const SearchMetrics = () => {
 
   const loadSearchLogs = async () => {
     setLoading(true);
-    let combinedLogs = [];
+    let resultLogs = [];
 
-    // 1. Obtener logs desde localStorage
-    try {
-      const localLogs = JSON.parse(localStorage.getItem('store_search_logs') || '[]');
-      combinedLogs = [...localLogs];
-    } catch (e) {
-      console.error('Error leyendo logs locales:', e);
-    }
-
-    // 2. Obtener logs desde Supabase
     try {
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - timeRange);
 
+      // Intentar leer los datos reales de Supabase
       const { data: dbLogs, error } = await supabase
         .from('search_logs')
         .select('*')
@@ -41,14 +33,19 @@ export const SearchMetrics = () => {
         .order('created_at', { ascending: false });
 
       if (!error && dbLogs && dbLogs.length > 0) {
-        // Fusionar evitando duplicados exactos si existen
-        combinedLogs = [...dbLogs, ...combinedLogs];
+        resultLogs = dbLogs;
+      } else {
+        // Fallback local solo si Supabase no devolvió registros
+        const localLogs = JSON.parse(localStorage.getItem('store_search_logs') || '[]');
+        resultLogs = localLogs;
       }
     } catch (err) {
-      console.warn('Supabase search_logs no disponible, usando almacenamiento local:', err);
+      console.warn('Leyendo respaldo local:', err);
+      const localLogs = JSON.parse(localStorage.getItem('store_search_logs') || '[]');
+      resultLogs = localLogs;
     }
 
-    setLogs(combinedLogs);
+    setLogs(resultLogs);
     setLoading(false);
   };
 
