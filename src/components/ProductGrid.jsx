@@ -1,7 +1,7 @@
 import React from 'react';
 import { ProductCard } from './ProductCard';
 import { useProducts } from '../context/ProductContext';
-import { ArrowUpDown, RefreshCw, SearchX } from 'lucide-react';
+import { ArrowUpDown, RefreshCw, SearchX, ArrowLeft } from 'lucide-react';
 
 export const ProductGrid = ({ onSelectProduct }) => {
   const { 
@@ -20,6 +20,7 @@ export const ProductGrid = ({ onSelectProduct }) => {
   } = useProducts();
 
   const currentCategoryObj = categories.find((c) => c.slug === selectedCategory);
+  const isFiltered = selectedCategory !== 'all' || featuredOnly || Boolean(searchQuery && searchQuery.trim());
 
   return (
     <section className="py-6 sm:py-8 bg-[#FAF7F5] min-h-[600px]">
@@ -30,8 +31,23 @@ export const ProductGrid = ({ onSelectProduct }) => {
           
           {/* Active Filter Title & Counter */}
           <div>
+            {isFiltered && (
+              <button
+                onClick={() => {
+                  setSelectedCategory('all');
+                  setSearchQuery('');
+                  setFeaturedOnly(false);
+                }}
+                className="inline-flex items-center gap-1.5 text-xs text-[#C8747D] hover:underline font-semibold mb-1 transition-all"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Volver al inicio / Ver todos los rubros</span>
+              </button>
+            )}
             <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#3D2B2E] tracking-tight flex items-center gap-2">
-              {featuredOnly
+              {searchQuery
+                ? `Resultados para "${searchQuery}"`
+                : featuredOnly
                 ? '⭐ Productos Destacados'
                 : selectedCategory === 'all'
                 ? 'Catálogo de Productos'

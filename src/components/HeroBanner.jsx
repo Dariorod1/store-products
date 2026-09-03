@@ -3,7 +3,12 @@ import { Sparkles, Truck, ShieldCheck, MessageCircle, ArrowRight, Heart } from '
 import { useProducts } from '../context/ProductContext';
 
 export const HeroBanner = () => {
-  const { setSelectedCategory } = useProducts();
+  const { selectedCategory, searchQuery, featuredOnly, setSelectedCategory } = useProducts();
+
+  // Si el usuario selecciona un rubro/categoría del menú, busca o filtra destacados, ocultar el Banner del Home
+  if (selectedCategory !== 'all' || featuredOnly || (searchQuery && searchQuery.trim() !== '')) {
+    return null;
+  }
 
   return (
     <section className="relative overflow-hidden bg-[#FAF7F5] pt-6 pb-8 sm:pt-8 sm:pb-12 border-b border-[#F0E2DC]">
