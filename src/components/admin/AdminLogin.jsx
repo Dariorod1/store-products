@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { ShieldCheck, Key, Lock, ArrowLeft, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useBackHandler } from '../../hooks/useBackHandler';
 
 export const AdminLogin = ({ onClose }) => {
   const [pin, setPin] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const { loginAdmin } = useAuth();
+
+  useBackHandler(true, onClose);
 
   const handleSubmit = (e) => {
     e.preventDefault();

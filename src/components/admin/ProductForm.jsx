@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { X, Save, Sparkles, Upload, ImageIcon, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useProducts } from '../../context/ProductContext';
 import { supabase } from '../../lib/supabase';
+import { useBackHandler } from '../../hooks/useBackHandler';
 
 // ─── Image Uploader Component ───────────────────────────────────────────────
 const ImageUploader = ({ currentUrl, onChange }) => {
@@ -206,6 +207,7 @@ const ImageUploader = ({ currentUrl, onChange }) => {
 // ─── Product Form ─────────────────────────────────────────────────────────────
 export const ProductForm = ({ productToEdit, onClose }) => {
   const { categories, addProduct, updateProduct } = useProducts();
+  useBackHandler(true, onClose);
 
   const [formData, setFormData] = useState({
     title: '',

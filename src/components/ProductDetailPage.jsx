@@ -22,10 +22,12 @@ import { useProducts } from '../context/ProductContext';
 import { formatPrice, calculateDiscount, generateWhatsAppUrl } from '../utils/formatters';
 import { createMercadoPagoCheckout } from '../services/mercadopago';
 import { ProductCard } from './ProductCard';
+import { useBackHandler } from '../hooks/useBackHandler';
 
 export const ProductDetailPage = ({ product, onBack, onSelectProduct }) => {
   const { addToCart } = useCart();
   const { products } = useProducts();
+  useBackHandler(true, onBack);
   const [quantity, setQuantity] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState(
     product?.category_slug === 'ropa' ? 'M' : null

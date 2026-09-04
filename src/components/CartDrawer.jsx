@@ -19,6 +19,7 @@ import { useCart } from '../context/CartContext';
 import { formatPrice, generateWhatsAppUrl } from '../utils/formatters';
 import { supabase } from '../lib/supabase';
 import { createMercadoPagoCheckout } from '../services/mercadopago';
+import { useBackHandler } from '../hooks/useBackHandler';
 
 export const CartDrawer = () => {
   const { 
@@ -30,6 +31,8 @@ export const CartDrawer = () => {
     clearCart, 
     cartTotal 
   } = useCart();
+
+  useBackHandler(isCartOpen, () => setIsCartOpen(false));
 
   const [customerInfo, setCustomerInfo] = useState({
     name: '',

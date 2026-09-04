@@ -14,9 +14,12 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { formatPrice } from '../utils/formatters';
+import { useBackHandler } from '../hooks/useBackHandler';
 
 export const PaymentSuccessModal = ({ paymentDetails, onClose }) => {
   const [copied, setCopied] = React.useState(false);
+
+  useBackHandler(!!paymentDetails, onClose);
 
   React.useEffect(() => {
     try {

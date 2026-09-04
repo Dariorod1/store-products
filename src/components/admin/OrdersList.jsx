@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { formatPrice } from '../../utils/formatters';
+import { useBackHandler } from '../../hooks/useBackHandler';
 
 export const OrdersList = () => {
   const [orders, setOrders] = useState([]);
@@ -13,6 +14,8 @@ export const OrdersList = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [loadingItems, setLoadingItems] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  useBackHandler(modalOpen && !!selectedOrder, () => setModalOpen(false));
 
   const fetchOrders = async () => {
     setLoading(true);

@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useProducts } from '../context/ProductContext';
 import { useAuth } from '../context/AuthContext';
+import { useBackHandler } from '../hooks/useBackHandler';
 
 const iconMap = {
   Shirt: Shirt,
@@ -27,6 +28,7 @@ const iconMap = {
 };
 
 export const SidebarMenu = ({ isOpen, onClose, onOpenAdmin }) => {
+  useBackHandler(isOpen, onClose);
   const { 
     categories, 
     selectedCategory, 
