@@ -71,12 +71,13 @@ export const AuthModal = ({ isOpen, onClose, onOpenAdmin }) => {
     setErrorMsg('');
     try {
       const res = await loginWithGoogle();
-      if (res.success) {
+      if (res?.success) {
         setSuccessMsg('¡Conectado con Google!');
         setTimeout(() => onClose(), 1000);
       }
     } catch (err) {
-      setErrorMsg('No se pudo conectar con Google.');
+      console.log('Google Auth error:', err);
+      setErrorMsg('El proveedor Google requiere activación en el panel de Supabase (Auth > Providers > Google). Podés registrarte o ingresar directamente con tu Email y Contraseña abajo.');
     } finally {
       setLoading(false);
     }

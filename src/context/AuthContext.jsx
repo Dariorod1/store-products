@@ -20,7 +20,9 @@ export const AuthProvider = ({ children }) => {
         const u = JSON.parse(savedUser);
         return u.isAdmin === true || u.email?.toLowerCase() === 'rociosmithja@gmail.com';
       }
-      return localStorage.getItem('store_admin_auth') === 'true';
+      // Limpiar claves legadas de localStorage para evitar falsos accesos
+      localStorage.removeItem('store_admin_auth');
+      return false;
     } catch (e) {
       return false;
     }
