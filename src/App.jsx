@@ -8,7 +8,7 @@ import { SidebarMenu } from './components/SidebarMenu';
 import { HeroBanner } from './components/HeroBanner';
 import { CategoryPills } from './components/CategoryPills';
 import { ProductGrid } from './components/ProductGrid';
-import { ProductDetailModal } from './components/ProductDetailModal';
+import { ProductDetailPage } from './components/ProductDetailPage';
 import { CartDrawer } from './components/CartDrawer';
 import { WhatsAppButton } from './components/WhatsAppButton';
 import { NotificationToast } from './components/NotificationToast';
@@ -23,8 +23,15 @@ const MainAppContent = () => {
   const { isAdminLoggedIn } = useAuth();
 
   useEffect(() => {
-    document.title = `${STORE_NAME} - Tienda Multirrubro`;
-  }, []);
+    document.title = selectedProduct 
+      ? `${selectedProduct.title} - ${STORE_NAME}`
+      : `${STORE_NAME} - Tienda Multirrubro`;
+  }, [selectedProduct]);
+
+  const handleSelectProduct = (prod) => {
+    setSelectedProduct(prod);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   if (viewAdmin) {
     if (!isAdminLoggedIn) {
@@ -43,16 +50,23 @@ const MainAppContent = () => {
           onOpenAdmin={() => setViewAdmin(true)}
         />
 
-        {/* Hero Section Banner */}
-        <HeroBanner />
-
-        {/* Category Pills Filter Bar */}
-        <CategoryPills />
-
-        {/* Main Product Catalog Grid */}
-        <main>
-          <ProductGrid onSelectProduct={(prod) => setSelectedProduct(prod)} />
-        </main>
+        {selectedProduct ? (
+          /* Dedicated Full Product Detail Page */
+          <ProductDetailPage
+            product={selectedProduct}
+            onBack={() => setSelectedProduct(null)}
+            onSelectProduct={handleSelectProduct}
+          />
+        ) : (
+          /* Catalog View */
+          <>
+            <HeroBanner />
+            <CategoryPills />
+            <main>
+              <ProductGrid onSelectProduct={handleSelectProduct} />
+            </main>
+          </>
+        )}
       </div>
 
       {/* Slide-over Drawers & Modals */}
@@ -61,13 +75,6 @@ const MainAppContent = () => {
         onClose={() => setIsSidebarOpen(false)}
         onOpenAdmin={() => setViewAdmin(true)}
       />
-
-      {selectedProduct && (
-        <ProductDetailModal
-          product={selectedProduct}
-          onClose={() => setSelectedProduct(null)}
-        />
-      )}
 
       <CartDrawer />
       <WhatsAppButton />
