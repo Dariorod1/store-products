@@ -2,11 +2,8 @@ import { supabase } from '../lib/supabase';
 
 /**
  * Creates a Mercado Pago Checkout Preference
- * First tries backend endpoint `/api/create-preference`, then falls back to direct REST API call.
  */
 export const createMercadoPagoCheckout = async (cartItems, customerInfo) => {
-  const accessToken = import.meta.env.MP_ACCESS_TOKEN || import.meta.env.VITE_MP_ACCESS_TOKEN;
-  
   if (!cartItems || cartItems.length === 0) {
     throw new Error('El carrito está vacío');
   }
@@ -46,29 +43,7 @@ export const createMercadoPagoCheckout = async (cartItems, customerInfo) => {
     console.log('Order creation log warning:', e);
   }
 
-  // 2. Formatear datos para la Preferencia de Mercado Pago
-  const preferencePayload = {
-    items: cartItems.map(item => ({
-      title: item.title,
-      unit_price: Number(item.price),
-      quantity: Number(item.quantity),
-      currency_id: 'ARS'
-    })),
-    payer: {
-      name: customerInfo?.name || 'Cliente',
-      phone: customerInfo?.phone ? { number: customerInfo.phone } : undefined,
-      address: customerInfo?.address ? { street_name: customerInfo.address } : undefined
-    },
-    back_urls: {
-      success: window.location.origin,
-      failure: window.location.origin,
-      pending: window.location.origin
-    },
-    auto_return: 'approved',
-    statement_descriptor: 'TIENDA ROOH'
-  };
-
-  // 3. Intentar primero con la API Serverless /api/create-preference
+  // 2. Intentar llamar al backend Serverless /api/create-preference de Vercel
   try {
     const apiResponse = await fetch('/api/create-preference', {
       method: 'POST',
@@ -76,37 +51,61 @@ export const createMercadoPagoCheckout = async (cartItems, customerInfo) => {
       body: JSON.stringify({ items: cartItems, customerInfo })
     });
 
-    if (apiResponse.ok) {
-      const data = await apiResponse.json();
-      if (data.init_point) {
-        return data.init_point;
-      }
+    const data = await apiResponse.json();
+
+    if (apiResponse.ok && (data.init_point || data.sandbox_init_point)) {
+      return data.init_point || data.sandbox_init_point;
     }
-  } catch (err) {
-    console.log('Backend serverless fallback to direct MP REST API call');
+
+    if (data && data.error) {
+      throw new Error(data.error);
+    }
+  } catch (backendErr) {
+    // Si la respuesta del backend traía un error explícito (ej: falta clave), lanzar esa excepción
+    if (backendErr.message && !backendErr.message.includes('Failed to fetch') && !backendErr.message.includes('Unexpected token')) {
+      throw backendErr;
+    }
+    console.log('Intento de fallback local para desarrollo...');
   }
 
-  // 4. Fallback directo a la API de Mercado Pago usando AccessToken
-  if (!accessToken) {
-    throw new Error('No se encontró la clave MP_ACCESS_TOKEN de Mercado Pago.');
+  // 3. Fallback para desarrollo local si MP_ACCESS_TOKEN existe en el cliente
+  const accessToken = import.meta.env.MP_ACCESS_TOKEN || import.meta.env.VITE_MP_ACCESS_TOKEN;
+  if (accessToken) {
+    const preferencePayload = {
+      items: cartItems.map(item => ({
+        title: item.title,
+        unit_price: Number(item.price),
+        quantity: Number(item.quantity),
+        currency_id: 'ARS'
+      })),
+      payer: {
+        name: customerInfo?.name || 'Cliente',
+        phone: customerInfo?.phone ? { number: customerInfo.phone } : undefined,
+        address: customerInfo?.address ? { street_name: customerInfo.address } : undefined
+      },
+      back_urls: {
+        success: window.location.origin,
+        failure: window.location.origin,
+        pending: window.location.origin
+      },
+      auto_return: 'approved',
+      statement_descriptor: 'TIENDA ROOH'
+    };
+
+    const res = await fetch('https://api.mercadopago.com/checkout/preferences', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
+      },
+      body: JSON.stringify(preferencePayload)
+    });
+
+    const resData = await res.json();
+    if (resData.init_point) return resData.init_point;
+    if (resData.sandbox_init_point) return resData.sandbox_init_point;
+    throw new Error(resData.message || resData.error || 'Error al conectar con Mercado Pago');
   }
 
-  const res = await fetch('https://api.mercadopago.com/checkout/preferences', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${accessToken}`
-    },
-    body: JSON.stringify(preferencePayload)
-  });
-
-  const resData = await res.json();
-
-  if (resData.init_point) {
-    return resData.init_point;
-  } else if (resData.sandbox_init_point) {
-    return resData.sandbox_init_point;
-  } else {
-    throw new Error(resData.message || resData.error || 'No se pudo generar la preferencia de Mercado Pago');
-  }
+  throw new Error('No se pudo procesar el pago. Asegúrate de hacer un REDEPLOY en Vercel para que tome las nuevas variables de entorno.');
 };
