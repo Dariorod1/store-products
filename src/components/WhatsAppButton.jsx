@@ -1,3 +1,5 @@
+import React from 'react';
+import { MessageCircle } from 'lucide-react';
 import { WHATSAPP_NUMBER } from '../lib/config';
 
 export const WhatsAppButton = () => {
