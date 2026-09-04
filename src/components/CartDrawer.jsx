@@ -9,12 +9,16 @@ import {
   User,
   Phone,
   MapPin,
-  FileText
+  FileText,
+  CreditCard,
+  Loader2,
+  AlertCircle
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useCart } from '../context/CartContext';
 import { formatPrice, generateWhatsAppUrl } from '../utils/formatters';
 import { supabase } from '../lib/supabase';
+import { createMercadoPagoCheckout } from '../services/mercadopago';
 
 export const CartDrawer = () => {
   const { 
@@ -35,6 +39,8 @@ export const CartDrawer = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmittingMp, setIsSubmittingMp] = useState(false);
+  const [mpError, setMpError] = useState(null);
 
   if (!isCartOpen) return null;
 
@@ -92,6 +98,24 @@ export const CartDrawer = () => {
     const whatsappUrl = generateWhatsAppUrl(cartItems, customerInfo);
     window.open(whatsappUrl, '_blank');
     setIsSubmitting(false);
+  };
+
+  const handleCheckoutMercadoPago = async (e) => {
+    e.preventDefault();
+    if (cartItems.length === 0) return;
+
+    setIsSubmittingMp(true);
+    setMpError(null);
+    triggerConfetti();
+
+    try {
+      const initPoint = await createMercadoPagoCheckout(cartItems, customerInfo);
+      window.location.href = initPoint;
+    } catch (err) {
+      console.error('Error initiating Mercado Pago:', err);
+      setMpError(err.message || 'No se pudo iniciar el pago. Intenta por WhatsApp.');
+      setIsSubmittingMp(false);
+    }
   };
 
   return (
@@ -216,7 +240,7 @@ export const CartDrawer = () => {
             </div>
 
             {/* Customer Form */}
-            <form onSubmit={handleCheckoutWhatsApp} className="p-4 rounded-2xl bg-[#FDF6F0] border border-[#E8D5CD] space-y-3">
+            <div className="p-4 rounded-2xl bg-[#FDF6F0] border border-[#E8D5CD] space-y-3">
               <h4 className="text-xs font-bold uppercase tracking-wider text-[#C8747D] flex items-center gap-2">
                 <User className="w-4 h-4" /> Datos de Envío y Contacto
               </h4>
@@ -287,15 +311,57 @@ export const CartDrawer = () => {
                 </div>
               </div>
 
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full py-3.5 px-4 rounded-2xl bg-[#2D6A3B] hover:bg-[#23542E] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all hover:scale-[1.02] mt-2"
-              >
-                <MessageCircle className="w-4 h-4 text-white" />
-                <span>Finalizar Pedido por WhatsApp</span>
-              </button>
-            </form>
+              {/* Error Message */}
+              {mpError && (
+                <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+                  <span>{mpError}</span>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="space-y-2 pt-1">
+                {/* Mercado Pago Checkout Button */}
+                <button
+                  type="button"
+                  onClick={handleCheckoutMercadoPago}
+                  disabled={isSubmittingMp || isSubmitting}
+                  className="w-full py-3.5 px-4 rounded-2xl bg-[#009EE3] hover:bg-[#0082C5] active:scale-[0.99] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-all group"
+                >
+                  {isSubmittingMp ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin text-white" />
+                      <span>Conectando con Mercado Pago...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
+                      <span>Pagar con Mercado Pago</span>
+                    </>
+                  )}
+                </button>
+
+                {/* WhatsApp Order Button */}
+                <button
+                  type="button"
+                  onClick={handleCheckoutWhatsApp}
+                  disabled={isSubmitting || isSubmittingMp}
+                  className="w-full py-3.5 px-4 rounded-2xl bg-[#2D6A3B] hover:bg-[#23542E] active:scale-[0.99] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin text-white" />
+                      <span>Procesando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <MessageCircle className="w-4 h-4 text-white" />
+                      <span>Finalizar Pedido por WhatsApp</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
 
           </div>
         )}
