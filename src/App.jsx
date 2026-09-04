@@ -12,21 +12,74 @@ import { ProductDetailPage } from './components/ProductDetailPage';
 import { CartDrawer } from './components/CartDrawer';
 import { WhatsAppButton } from './components/WhatsAppButton';
 import { NotificationToast } from './components/NotificationToast';
+import { PaymentSuccessModal } from './components/PaymentSuccessModal';
 import { AdminLayout } from './components/admin/AdminLayout';
 import { AdminLogin } from './components/admin/AdminLogin';
+import { useCart } from './context/CartContext';
+import { supabase } from './lib/supabase';
 import { Store, ShieldCheck, Heart, MessageCircle } from 'lucide-react';
 
 const MainAppContent = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [viewAdmin, setViewAdmin] = useState(false);
+  const [paymentSuccessDetails, setPaymentSuccessDetails] = useState(null);
   const { isAdminLoggedIn } = useAuth();
+  const { clearCart } = useCart();
 
   useEffect(() => {
     document.title = selectedProduct 
       ? `${selectedProduct.title} - ${STORE_NAME}`
       : `${STORE_NAME} - Tienda Multirrubro`;
   }, [selectedProduct]);
+
+  // Manejar el retorno tras un pago aprobado en Mercado Pago
+  useEffect(() => {
+    const handlePaymentReturn = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const paymentStatus = urlParams.get('payment_status') || urlParams.get('collection_status') || urlParams.get('status');
+      const paymentId = urlParams.get('payment_id') || urlParams.get('collection_id');
+      const orderId = urlParams.get('order_id') || urlParams.get('external_reference');
+
+      if (paymentStatus === 'approved' || paymentStatus === 'completed') {
+        // Vaciar el carrito de compras
+        clearCart();
+
+        let customerName = 'Cliente Web';
+        let totalAmount = 0;
+
+        // Actualizar automáticamente la orden en Supabase a 'completed'
+        if (orderId) {
+          try {
+            const { data: updatedOrder } = await supabase
+              .from('orders')
+              .update({ status: 'completed' })
+              .eq('id', orderId)
+              .select('*');
+
+            if (updatedOrder && updatedOrder.length > 0) {
+              customerName = updatedOrder[0].customer_name || 'Cliente Web';
+              totalAmount = updatedOrder[0].total_amount || 0;
+            }
+          } catch (e) {
+            console.log('Error al actualizar pedido en Supabase:', e);
+          }
+        }
+
+        setPaymentSuccessDetails({
+          orderId,
+          paymentId,
+          customerName,
+          totalAmount
+        });
+
+        // Limpiar parámetros de la URL sin recargar
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    };
+
+    handlePaymentReturn();
+  }, []);
 
   const handleSelectProduct = (prod) => {
     setSelectedProduct(prod);
@@ -75,6 +128,13 @@ const MainAppContent = () => {
         onClose={() => setIsSidebarOpen(false)}
         onOpenAdmin={() => setViewAdmin(true)}
       />
+
+      {paymentSuccessDetails && (
+        <PaymentSuccessModal
+          paymentDetails={paymentSuccessDetails}
+          onClose={() => setPaymentSuccessDetails(null)}
+        />
+      )}
 
       <CartDrawer />
       <WhatsAppButton />

@@ -10,11 +10,16 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { items, customerInfo } = req.body || {};
+    const { items, customerInfo, orderId } = req.body || {};
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ error: 'Lista de items inválida o vacía' });
     }
+
+    const origin = req.headers.origin || 'https://tiendarooh.vercel.app';
+    const redirectSuccess = orderId 
+      ? `${origin}/?payment_status=approved&order_id=${orderId}`
+      : `${origin}/?payment_status=approved`;
 
     const preferencePayload = {
       items: items.map(item => ({
@@ -28,10 +33,11 @@ export default async function handler(req, res) {
         phone: customerInfo?.phone ? { number: String(customerInfo.phone) } : undefined,
         address: customerInfo?.address ? { street_name: String(customerInfo.address) } : undefined
       },
+      external_reference: orderId ? String(orderId) : undefined,
       back_urls: {
-        success: req.headers.origin || 'https://tiendarooh.vercel.app/',
-        failure: req.headers.origin || 'https://tiendarooh.vercel.app/',
-        pending: req.headers.origin || 'https://tiendarooh.vercel.app/'
+        success: redirectSuccess,
+        failure: `${origin}/?payment_status=failure`,
+        pending: `${origin}/?payment_status=pending`
       },
       auto_return: 'approved',
       statement_descriptor: 'TIENDA ROOH'

@@ -10,8 +10,9 @@ export const createMercadoPagoCheckout = async (cartItems, customerInfo) => {
 
   // 1. Guardar orden previa en Supabase
   let orderId = null;
+  const totalAmount = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
   try {
-    const totalAmount = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const { data: orderData } = await supabase
       .from('orders')
       .insert([
@@ -48,7 +49,7 @@ export const createMercadoPagoCheckout = async (cartItems, customerInfo) => {
     const apiResponse = await fetch('/api/create-preference', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items: cartItems, customerInfo })
+      body: JSON.stringify({ items: cartItems, customerInfo, orderId })
     });
 
     const data = await apiResponse.json();
@@ -61,7 +62,6 @@ export const createMercadoPagoCheckout = async (cartItems, customerInfo) => {
       throw new Error(data.error);
     }
   } catch (backendErr) {
-    // Si la respuesta del backend traía un error explícito (ej: falta clave), lanzar esa excepción
     if (backendErr.message && !backendErr.message.includes('Failed to fetch') && !backendErr.message.includes('Unexpected token')) {
       throw backendErr;
     }
@@ -71,6 +71,10 @@ export const createMercadoPagoCheckout = async (cartItems, customerInfo) => {
   // 3. Fallback para desarrollo local si MP_ACCESS_TOKEN existe en el cliente
   const accessToken = import.meta.env.MP_ACCESS_TOKEN || import.meta.env.VITE_MP_ACCESS_TOKEN;
   if (accessToken) {
+    const redirectSuccess = orderId 
+      ? `${window.location.origin}/?payment_status=approved&order_id=${orderId}`
+      : `${window.location.origin}/?payment_status=approved`;
+
     const preferencePayload = {
       items: cartItems.map(item => ({
         title: item.title,
@@ -83,10 +87,11 @@ export const createMercadoPagoCheckout = async (cartItems, customerInfo) => {
         phone: customerInfo?.phone ? { number: customerInfo.phone } : undefined,
         address: customerInfo?.address ? { street_name: customerInfo.address } : undefined
       },
+      external_reference: orderId ? String(orderId) : undefined,
       back_urls: {
-        success: window.location.origin,
-        failure: window.location.origin,
-        pending: window.location.origin
+        success: redirectSuccess,
+        failure: `${window.location.origin}/?payment_status=failure`,
+        pending: `${window.location.origin}/?payment_status=pending`
       },
       auto_return: 'approved',
       statement_descriptor: 'TIENDA ROOH'
@@ -107,5 +112,5 @@ export const createMercadoPagoCheckout = async (cartItems, customerInfo) => {
     throw new Error(resData.message || resData.error || 'Error al conectar con Mercado Pago');
   }
 
-  throw new Error('No se pudo procesar el pago. Asegúrate de hacer un REDEPLOY en Vercel para que tome las nuevas variables de entorno.');
+  throw new Error('No se pudo procesar el pago. Asegúrate de hacer un REDEPLOY en Vercel.');
 };
