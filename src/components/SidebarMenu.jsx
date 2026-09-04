@@ -1,4 +1,3 @@
-import React from 'react';
 import { 
   X, 
   Shirt, 
@@ -12,7 +11,8 @@ import {
   MessageCircle, 
   ShieldCheck,
   ChevronRight,
-  Database
+  Database,
+  User
 } from 'lucide-react';
 import { useProducts } from '../context/ProductContext';
 import { useAuth } from '../context/AuthContext';
@@ -27,7 +27,7 @@ const iconMap = {
   ShoppingBag: ShoppingBag
 };
 
-export const SidebarMenu = ({ isOpen, onClose, onOpenAdmin }) => {
+export const SidebarMenu = ({ isOpen, onClose, onOpenAdmin, onOpenAuth }) => {
   useBackHandler(isOpen, onClose);
   const { 
     categories, 
@@ -39,7 +39,7 @@ export const SidebarMenu = ({ isOpen, onClose, onOpenAdmin }) => {
     isUsingSupabase 
   } = useProducts();
 
-  const { isAdminLoggedIn } = useAuth();
+  const { user, isAdminLoggedIn } = useAuth();
 
   if (!isOpen) return null;
 
@@ -196,17 +196,31 @@ export const SidebarMenu = ({ isOpen, onClose, onOpenAdmin }) => {
             Contactar por WhatsApp
           </a>
 
-          {/* Admin Panel Button */}
+          {/* User Account / Login Button */}
           <button
             onClick={() => {
               onClose();
-              onOpenAdmin();
+              if (onOpenAuth) onOpenAuth();
             }}
-            className="w-full py-2.5 px-4 rounded-xl bg-white hover:bg-[#FDF6F0] text-[#4A3538] text-xs font-semibold flex items-center justify-center gap-2 transition-all border border-[#F0E2DC]"
+            className="w-full py-2.5 px-4 rounded-xl bg-[#FAF0EA] hover:bg-[#F3E2DA] border border-[#E8D5CD] text-[#5C4246] text-xs font-semibold flex items-center justify-center gap-2 transition-all"
           >
-            <ShieldCheck className="w-4 h-4 text-[#C8747D]" />
-            {isAdminLoggedIn ? 'Panel de Emprendedor' : 'Acceso Emprendedor (Admin)'}
+            <User className="w-4 h-4 text-[#C8747D]" />
+            <span>{user ? `Mi Cuenta (${user.name.split(' ')[0]})` : 'Iniciar Sesión / Registrarse'}</span>
           </button>
+
+          {/* Admin Panel Button (ONLY VISIBLE TO ADMINS) */}
+          {isAdminLoggedIn && (
+            <button
+              onClick={() => {
+                onClose();
+                onOpenAdmin();
+              }}
+              className="w-full py-2.5 px-4 rounded-xl bg-[#EBF5ED] hover:bg-[#DDF0E0] text-[#2D6A3B] border border-[#C2E0C8] text-xs font-bold flex items-center justify-center gap-2 transition-all"
+            >
+              <ShieldCheck className="w-4 h-4 text-[#2D6A3B]" />
+              Panel de Emprendedor
+            </button>
+          )}
         </div>
       </aside>
     </div>

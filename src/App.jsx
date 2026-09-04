@@ -9,6 +9,7 @@ import { HeroBanner } from './components/HeroBanner';
 import { CategoryPills } from './components/CategoryPills';
 import { ProductGrid } from './components/ProductGrid';
 import { ProductDetailPage } from './components/ProductDetailPage';
+import { AuthModal } from './components/AuthModal';
 import { CartDrawer } from './components/CartDrawer';
 import { WhatsAppButton } from './components/WhatsAppButton';
 import { NotificationToast } from './components/NotificationToast';
@@ -21,6 +22,7 @@ import { Store, ShieldCheck, Heart, MessageCircle } from 'lucide-react';
 
 const MainAppContent = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [viewAdmin, setViewAdmin] = useState(false);
   const [paymentSuccessDetails, setPaymentSuccessDetails] = useState(null);
@@ -42,13 +44,11 @@ const MainAppContent = () => {
       const orderId = urlParams.get('order_id') || urlParams.get('external_reference');
 
       if (paymentStatus === 'approved' || paymentStatus === 'completed') {
-        // Vaciar el carrito de compras
         clearCart();
 
         let customerName = 'Cliente Web';
         let totalAmount = 0;
 
-        // Actualizar automáticamente la orden en Supabase a 'completed'
         if (orderId) {
           try {
             const { data: updatedOrder } = await supabase
@@ -73,7 +73,6 @@ const MainAppContent = () => {
           totalAmount
         });
 
-        // Limpiar parámetros de la URL sin recargar
         window.history.replaceState({}, document.title, window.location.pathname);
       }
     };
@@ -101,6 +100,7 @@ const MainAppContent = () => {
         <Navbar
           onOpenSidebar={() => setIsSidebarOpen(true)}
           onOpenAdmin={() => setViewAdmin(true)}
+          onOpenAuth={() => setIsAuthModalOpen(true)}
         />
 
         {selectedProduct ? (
@@ -126,6 +126,13 @@ const MainAppContent = () => {
       <SidebarMenu
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
+        onOpenAdmin={() => setViewAdmin(true)}
+        onOpenAuth={() => setIsAuthModalOpen(true)}
+      />
+
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
         onOpenAdmin={() => setViewAdmin(true)}
       />
 
@@ -173,7 +180,7 @@ const MainAppContent = () => {
               </ul>
             </div>
 
-            {/* Contact & Admin */}
+            {/* Contact & Admin (Only if Admin) */}
             <div>
               <h4 className="font-serif font-bold text-xs text-[#3D2B2E] uppercase tracking-wider mb-3">
                 Atención Directa
@@ -187,12 +194,15 @@ const MainAppContent = () => {
                 >
                   <MessageCircle className="w-4 h-4" /> WhatsApp Oficial
                 </a>
-                <button
-                  onClick={() => setViewAdmin(true)}
-                  className="flex items-center gap-2 text-[#C8747D] hover:underline pt-2 font-semibold"
-                >
-                  <ShieldCheck className="w-4 h-4" /> Panel del Emprendedor
-                </button>
+                
+                {isAdminLoggedIn && (
+                  <button
+                    onClick={() => setViewAdmin(true)}
+                    className="flex items-center gap-2 text-[#C8747D] hover:underline pt-2 font-semibold"
+                  >
+                    <ShieldCheck className="w-4 h-4" /> Panel de Administradora
+                  </button>
+                )}
               </div>
             </div>
 

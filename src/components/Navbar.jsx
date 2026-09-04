@@ -8,17 +8,18 @@ import {
   UserCheck, 
   Sparkles,
   ShieldCheck,
-  Store
+  Store,
+  User
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useProducts } from '../context/ProductContext';
 import { useAuth } from '../context/AuthContext';
 import { formatPrice } from '../utils/formatters';
 
-export const Navbar = ({ onOpenSidebar, onOpenAdmin }) => {
+export const Navbar = ({ onOpenSidebar, onOpenAdmin, onOpenAuth }) => {
   const { cartCount, cartTotal, setIsCartOpen } = useCart();
   const { searchQuery, setSearchQuery } = useProducts();
-  const { isAdminLoggedIn } = useAuth();
+  const { user, isAdminLoggedIn } = useAuth();
 
   return (
     <header className="sticky top-0 z-40 bg-[#FFFDF9]/90 backdrop-blur-md border-b border-[#F0E2DC] text-[#3D2B2E] transition-all shadow-xs">
@@ -76,30 +77,36 @@ export const Navbar = ({ onOpenSidebar, onOpenAdmin }) => {
           </div>
         </div>
 
-        {/* Right Section: Admin Entry & Cart Button */}
+        {/* Right Section: User Auth, Admin Panel (Only if Admin) & Cart Button */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Admin Panel Button */}
+          
+          {/* User Auth Button */}
           <button
-            onClick={onOpenAdmin}
-            className={`px-3.5 py-2 rounded-2xl text-xs font-semibold flex items-center gap-1.5 transition-all border shadow-xs ${
-              isAdminLoggedIn
-                ? 'bg-[#EBF5ED] text-[#2D6A3B] border-[#C2E0C8] hover:bg-[#DDF0E0]'
-                : 'bg-[#FAF0EA] text-[#5C4246] border-[#E8D5CD] hover:bg-[#F3E2DA]'
-            }`}
-            title={isAdminLoggedIn ? 'Panel de Emprendedor Activo' : 'Ingreso para el Emprendedor'}
+            onClick={onOpenAuth}
+            className="px-3 sm:px-3.5 py-2 rounded-2xl bg-[#FAF0EA] hover:bg-[#F3E2DA] border border-[#E8D5CD] text-[#5C4246] hover:text-[#3D2B2E] text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs"
+            title={user ? `Sesión iniciada como ${user.name}` : 'Iniciar Sesión / Registrarse'}
           >
-            {isAdminLoggedIn ? (
-              <>
-                <UserCheck className="w-4 h-4 text-[#2D6A3B]" />
-                <span className="hidden sm:inline">Panel Admin</span>
-              </>
+            {user?.avatar ? (
+              <img src={user.avatar} alt={user.name} className="w-4 h-4 rounded-full object-cover" />
             ) : (
-              <>
-                <ShieldCheck className="w-4 h-4 text-[#C8747D]" />
-                <span className="hidden sm:inline">Emprendedor</span>
-              </>
+              <User className="w-4 h-4 text-[#C8747D]" />
             )}
+            <span className="hidden sm:inline max-w-[90px] truncate">
+              {user ? user.name.split(' ')[0] : 'Ingresar'}
+            </span>
           </button>
+
+          {/* Admin Panel Button (ONLY VISIBLE TO ADMINS) */}
+          {isAdminLoggedIn && (
+            <button
+              onClick={onOpenAdmin}
+              className="px-3.5 py-2 rounded-2xl text-xs font-semibold flex items-center gap-1.5 transition-all border shadow-xs bg-[#EBF5ED] text-[#2D6A3B] border-[#C2E0C8] hover:bg-[#DDF0E0]"
+              title="Panel de Administradora Activo"
+            >
+              <UserCheck className="w-4 h-4 text-[#2D6A3B]" />
+              <span className="hidden sm:inline">Panel Admin</span>
+            </button>
+          )}
 
           {/* Cart Toggle Button */}
           <button

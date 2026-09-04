@@ -60,7 +60,7 @@ export const AdminLogin = ({ onClose }) => {
 
           <div>
             <label className="text-xs font-bold text-[#5C4246] uppercase tracking-wider block mb-1.5">
-              PIN o Contraseña Admin:
+              Contraseña de Administradora (Rocío Smith):
             </label>
             <div className="relative">
               <Key className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#A88C90]" />
@@ -69,12 +69,12 @@ export const AdminLogin = ({ onClose }) => {
                 required
                 value={pin}
                 onChange={(e) => setPin(e.target.value)}
-                placeholder="Ingresa tu clave (Ej: 1234)"
+                placeholder="Ingresa tu contraseña admin"
                 className="w-full pl-10 pr-4 py-3 rounded-2xl bg-[#FDF6F0] border border-[#E8D5CD] text-[#3D2B2E] font-mono text-sm placeholder-[#A88C90] focus:outline-none focus:border-[#C8747D]"
               />
             </div>
             <p className="text-[11px] text-[#8C7276] mt-1">
-              * Clave predeterminada por defecto: <strong className="text-[#C8747D] font-mono">1234</strong> o <strong className="text-[#C8747D] font-mono">admin</strong>
+              * Administradora: <strong className="text-[#C8747D]">rociosmithja@gmail.com</strong>
             </p>
           </div>
 
@@ -82,7 +82,7 @@ export const AdminLogin = ({ onClose }) => {
             type="submit"
             className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-[#D88A92] to-[#C8747D] hover:from-[#C8747D] hover:to-[#B85B65] text-white font-bold text-xs shadow-md shadow-[#D88A92]/20 transition-all hover:scale-[1.02]"
           >
-            Iniciar Sesión
+            Ingresar al Panel Admin
           </button>
         </form>
 
